@@ -1,13 +1,9 @@
-LABEL authors="Gabriel Bouchard"
-
 FROM python:3.13.3
+LABEL authors="Gabriel Bouchard"
 
 WORKDIR /app
 
 ENV PYTHONPATH=/app
-ENV DB_URL='http://localhost:3333'
-ENV PAYMENTS_URL='http://localhost:2000'
-ENV FASTAPI_PORT=1000
 
 COPY pyproject.toml poetry.lock ./
 

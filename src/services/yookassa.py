@@ -1,14 +1,14 @@
 import uuid
 
-from yookassa import Payment, Configuration
+from yookassa import Payment, Configuration # noqa
 
 from src.config import config
 
 
 class YookassaService:
 
-    Configuration.account_id = config.YOOKASSA_SHOP_ID
-    Configuration.secret_key = config.YOOKASSA_SECRET_KEY
+    Configuration.account_id = config.yookassa.shop_id
+    Configuration.secret_key = config.yookassa.secret_key
 
     @staticmethod
     async def create_monthly_payment_link(user_id: int):

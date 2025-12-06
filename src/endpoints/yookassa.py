@@ -8,9 +8,6 @@ from src.dependencies import get_db
 from src.logconf import opt_logger as log
 from src.models import Payment
 
-if TYPE_CHECKING:
-    from src.services.database import DatabaseService
-
 router = APIRouter(prefix="/api/webhook")
 logger = log.setup_logger('webhook_payments')
 
