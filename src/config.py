@@ -15,6 +15,9 @@ class YookassaConfig:
 @dataclass
 class DatabaseConfig:
     url: str = os.getenv('DATABASE_URL')
+    min_size: int = 5
+    max_size: int = 20
+    timeout: int = 60
 
 
 @dataclass

@@ -47,8 +47,7 @@ class DatabaseService:
             await conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS payment_status_info (
-                id SERIAL PRIMARY KEY,
-                user_id BIGINT NOT NULL REFERENCES users(user_id),
+                user_id BIGINT PRIMARY KEY,
                 amount NUMERIC NOT NULL,
                 currency VARCHAR(10) NULL,
                 period TEXT NULL,
@@ -64,12 +63,12 @@ class DatabaseService:
                 """
                 CREATE TABLE IF NOT EXISTS transaction_history (
                 id SERIAL PRIMARY KEY,
-                user_id BIGINT NOT NULL REFERENCES users(user_id),
+                user_id BIGINT NOT NULL REFERENCES payment_status_info(user_id),
                 amount NUMERIC NOT NULL,
                 currency VARCHAR(10) NOT NULL,
                 payment_id TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT NOW(),
-                UNIQUE (user_id, payment_id)
+                UNIQUE (user_id, created_at)
                 ); 
                 """
             )
@@ -80,7 +79,7 @@ class DatabaseService:
                 """
                 CREATE TABLE IF NOT EXISTS payment_methods (
                 id SERIAL PRIMARY KEY,
-                user_id BIGINT NOT NULL REFERENCES users(user_id),
+                user_id BIGINT NOT NULL REFERENCES payment_status_info(user_id),
                 payment_method_id TEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT NOW()
                 );
@@ -96,7 +95,8 @@ class DatabaseService:
             yield conn
 
         except Exception as e:
-            raise logger.warning(f"Connection error occurred, not releasing invalid connection: {e}")
+            logger.error(f"Connection error occurred, not releasing invalid connection: {e}")
+            raise
 
         finally:
             if conn and not conn.is_closed():
@@ -123,7 +123,7 @@ class DatabaseService:
 
                 await conn.execute(
                     """
-                    INSERT INTO payment_status_info (user_id, period, amount, currency, trial, untill) 
+                    INSERT INTO payment_status_info (user_id, period, amount, currency, trial, until)
                     VALUES ($1, $2, $3, $4, $5, $6)
                     """,
                     payment_data.user_id,
@@ -217,14 +217,14 @@ class DatabaseService:
                 "DELETE FROM payment_methods WHERE user_id = $1", user_id
             )
             await conn.execute(
-                "UPDATE users SET is_active = false WHERE user_id = $1", user_id
+                "UPDATE payment_info_status SET is_active = false WHERE user_id = $1", user_id
             )
 
     async def activate_subscription(self, user_id: int):
         async with self.acquire_connection() as conn:
             try:
                 await conn.execute(
-                    "UPDATE users SET is_active = true WHERE user_id = $1", user_id
+                    "UPDATE payment_info_status SET is_active = true WHERE user_id = $1", user_id
                 )
 
             except Exception as e:

@@ -12,7 +12,7 @@ async def get_user_link(
         user_id: int = Query(..., description="User ID"),
         yookassa: YookassaService = Depends(get_yookassa)
 ):
-    return yookassa.create_monthly_payment_link(user_id)
+    return {'link': yookassa.create_monthly_payment_link(user_id)}
 
 @router.get('/due_to')
 async def get_user_due_to(

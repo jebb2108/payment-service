@@ -1,6 +1,6 @@
 [project]
 name = "payment-service"
-version = "0.1.1"
+version = "0.1.2"
 description = "Service for Processing Payments"
 authors = [
     {name = "Gabriel Bouchard",email = "gabouchard2002@gmail.com"}

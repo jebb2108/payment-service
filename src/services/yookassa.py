@@ -11,7 +11,7 @@ class YookassaService:
     Configuration.secret_key = config.yookassa.secret_key
 
     @staticmethod
-    async def create_monthly_payment_link(user_id: int):
+    def create_monthly_payment_link(user_id: int):
         # Создание платежа в ЮKassa
         payment = Payment.create({
             "amount": {
