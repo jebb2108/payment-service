@@ -2,7 +2,6 @@ import os
 from dataclasses import dataclass
 from datetime import timezone, timedelta
 
-
 @dataclass
 class FastAPIConfig:
     port: int = int(os.getenv('PAYMENT_PORT'))
@@ -12,6 +11,10 @@ class FastAPIConfig:
 class YookassaConfig:
     shop_id: str = os.getenv('YOOKASSA_SHOP_ID')
     secret_key: str = os.getenv('YOOKASSA_SECRET_KEY')
+
+@dataclass
+class DatabaseConfig:
+    url: str = os.getenv('DATABASE_URL')
 
 
 @dataclass
@@ -23,10 +26,12 @@ class Config:
 
     fastapi: "FastAPIConfig" = None
     yookassa: "YookassaConfig" = None
+    database: "DatabaseConfig" = None
 
     def __post_init__(self):
         if not self.fastapi: self.fastapi = FastAPIConfig()
         if not self.yookassa: self.yookassa = YookassaConfig()
+        if not self.database: self.database = DatabaseConfig()
 
 
 config = Config()

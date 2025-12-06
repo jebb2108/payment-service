@@ -1,0 +1,47 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${PAYMENT_PORT}:${PAYMENT_PORT}"
+    environment:
+      DEBUG: ${DEBUG}
+      LOG_LEVEL: ${LOG_LEVEL}
+      PAYMENT_PORT: ${PAYMENT_PORT}
+      YOOKASSA_SHOP_ID: ${YOOKASSA_SHOP_ID}
+      YOOKASSA_SECRET_KEY: ${YOOKASSA_SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL}
+
+    networks:
+      - payments-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:13
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - payments-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  payments-network:
+    driver: bridge
+    name: tg-payments-network
+
+volumes:
+  postgres_data:
+
+
