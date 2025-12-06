@@ -117,33 +117,42 @@ class DatabaseService:
                     f"until={payment_data.until} (type: {type(payment_data.until)})"
                 )
 
-                # Convert datetime to naive for database storage
                 until_naive = payment_data.until.replace(
                     tzinfo=None) if payment_data.until.tzinfo else payment_data.until
 
                 await conn.execute(
                     """
-                    INSERT INTO payment_status_info (user_id, period, amount, currency, trial, until)
-                    VALUES ($1, $2, $3, $4, $5, $6)
+                    INSERT INTO payment_status_info 
+                    (user_id, period, amount, currency, trial, is_active, until)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    ON CONFLICT (user_id) DO UPDATE
+                    SET period = EXCLUDED.period,
+                    amount = EXCLUDED.amount,
+                    currency = EXCLUDED.currency,
+                    trial = EXCLUDED.trial,
+                    is_active = EXCLUDED.is_active,
+                    until = EXCLUDED.until
                     """,
                     payment_data.user_id,
                     payment_data.period,
                     payment_data.amount,
                     payment_data.currency,
                     payment_data.trial,
-                    until_naive,
+                    payment_data.is_active,
+                    until_naive
                 )
 
                 # Проверка на реальный платеж
-                if payment_data.payment_id:
-                    created_at = datetime.now(tz=config.tz_info).replace(tzinfo=None)
-
-                    await conn.execute(
-                        """
-                        INSERT INTO transaction_history (user_id, amount, currency, payment_id, created_at) VALUES ($1, $2, $3, $4, $5)
-                        """, payment_data.user_id, payment_data.amount, payment_data.currency, payment_data.payment_id,
-                        created_at
-                    )
+                await conn.execute(
+                    """
+                    INSERT INTO transaction_history (user_id, amount, currency, payment_id, created_at) VALUES ($1, $2, $3, $4, $5)
+                    """,
+                    payment_data.user_id,
+                    payment_data.amount,
+                    payment_data.currency,
+                    payment_data.payment_id,
+                    until_naive
+                )
 
             except Exception as e:
                 return logger.error(f"Error creating payment for user {payment_data.user_id}: {e}")
@@ -207,7 +216,7 @@ class DatabaseService:
                 FROM payment_status_info
                 WHERE user_id = $1
                 """,
-                user_id,
+                user_id
             )
             return row["until"] if row else None
 

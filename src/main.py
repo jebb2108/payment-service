@@ -2,11 +2,13 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
 
-from endpoints.yookassa import router as yookassa_router
 from endpoints.payments import router as payments_router
+from endpoints.yookassa import router as yookassa_router
 from src.config import config
 from src.dependencies import get_db
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI): # noqa
@@ -14,6 +16,15 @@ async def lifespan(app: FastAPI): # noqa
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware, # noqa
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(yookassa_router)
 app.include_router(payments_router)
 
