@@ -14,9 +14,8 @@ router = APIRouter(prefix='/api/payments')
 async def get_user_link(
         user_id: int = Query(..., description="User ID"),
         yookassa: YookassaService = Depends(get_yookassa)
-) -> Dict[str, str]:
-
-    return {'link': yookassa.create_monthly_payment_link(user_id)}
+) -> str:
+    return yookassa.create_monthly_payment_link(user_id)
 
 @router.post('/add')
 async def add_user_payment(
@@ -32,4 +31,4 @@ async def get_user_due_to(
         user_id: int = Query(..., description="User ID"),
         database: DatabaseService = Depends(get_db)
 ):
-    return {'due_to': await database.get_users_due_to(user_id)}
+    return await database.get_users_due_to(user_id)

@@ -20,8 +20,8 @@ class Payment(BaseModel):
     )
     trial: Optional[bool] = Field(True, description="If it is trial period for user")
     is_active: Optional[bool] = Field(True, description='If this subscription is still active')
-    until: Optional[datetime] = (
-        datetime.now(tz=config.tz_info) + timedelta(days=3)
+    until: Optional[datetime] = Field(
+        default=datetime.now(tz=config.tz_info) + timedelta(days=3), description="Trial period"
     )
 
     currency: Optional[str] = Field("RUB", description="Currency of payment")

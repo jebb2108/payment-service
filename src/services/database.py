@@ -66,7 +66,7 @@ class DatabaseService:
                 user_id BIGINT NOT NULL REFERENCES payment_status_info(user_id),
                 amount NUMERIC NOT NULL,
                 currency VARCHAR(10) NOT NULL,
-                payment_id TEXT NOT NULL,
+                payment_id TEXT NULL,
                 created_at TIMESTAMP DEFAULT NOW(),
                 UNIQUE (user_id, created_at)
                 ); 
@@ -107,7 +107,7 @@ class DatabaseService:
         async with self.acquire_connection() as conn:
             try:
 
-                logger.debug(
+                logger.info(
                     f"Parameters for payment_status_info: "
                     f"user_id={payment_data.user_id} (type: {type(payment_data.user_id)}), "
                     f"period={payment_data.period} (type: {type(payment_data.period)}), "
@@ -153,12 +153,11 @@ class DatabaseService:
                     payment_data.payment_id,
                     until_naive
                 )
+                logger.info(f"Payment successfully created for user {payment_data.user_id}")
 
             except Exception as e:
-                return logger.error(f"Error creating payment for user {payment_data.user_id}: {e}")
+                logger.error(f"Error creating payment for user {payment_data.user_id}: {e}")
 
-            finally:
-                return logger.info(f"Payment successfully created for user {payment_data.user_id}")
 
     async def save_payment_method(self, user_id: int, payment_method_id: str) -> None:
         """Сохранение payment_method_id для автоматических списаний"""
@@ -172,11 +171,11 @@ class DatabaseService:
                     """,
                     user_id, payment_method_id, new_updated_at
                 )
-            except Exception as e:
-                return logger.error(f"Error in saving method_payment_id for user %s: {e}", user_id)
+                logger.info(f"Payment method successfully saved for user %s", user_id)
 
-            finally:
-                return logger.info(f"Payment method successfully saved for user %s", user_id)
+            except Exception as e:
+                logger.error(f"Error in saving method_payment_id for user %s: {e}", user_id)
+
 
     async def get_active_subs(self, limit, offset) -> List[dict]:
         async with self.acquire_connection() as conn:
@@ -207,18 +206,18 @@ class DatabaseService:
                 """, user_id
             )
 
-    async def get_users_due_to(self, user_id: int) -> datetime:
+    async def get_users_due_to(self, user_id: int) -> dict:
         """ Отправляет данные о времени следующей оплаты, если пользователь активен """
         async with self.acquire_connection() as conn:
             row = await conn.fetchrow(
                 """
-                SELECT until
+                SELECT until, is_active
                 FROM payment_status_info
                 WHERE user_id = $1
                 """,
                 user_id
             )
-            return row["until"] if row else None
+            return dict(row) if row else None
 
     async def deactivate_subscription(self, user_id: int):
         async with self.acquire_connection() as conn:
