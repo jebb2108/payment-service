@@ -240,14 +240,14 @@ class DatabaseService:
                 "DELETE FROM payment_methods WHERE user_id = $1", user_id
             )
             await conn.execute(
-                "UPDATE payment_info_status SET is_active = false WHERE user_id = $1", user_id
+                "UPDATE payment_status_info SET is_active = false WHERE user_id = $1", user_id
             )
 
     async def activate_subscription(self, user_id: int):
         async with self.acquire_connection() as conn:
             try:
                 await conn.execute(
-                    "UPDATE payment_info_status SET is_active = true WHERE user_id = $1", user_id
+                    "UPDATE payment_status_info SET is_active = true WHERE user_id = $1", user_id
                 )
 
             except Exception as e:
