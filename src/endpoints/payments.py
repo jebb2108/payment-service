@@ -38,7 +38,7 @@ async def get_payment_data(
 ):
     return await database.get_payment_data(user_id)
 
-@router.post('activate')
+@router.post('/activate')
 async def activate_subscription(
         user_data: dict,
         database: DatabaseService = Depends(get_db)
@@ -47,7 +47,7 @@ async def activate_subscription(
     return await database.activate_subscription(user_id)
 
 
-@router.post('deactivate')
+@router.post('/deactivate')
 async def deactivate_subscription(
         user_data: dict,
         database: DatabaseService = Depends(get_db)
