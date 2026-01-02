@@ -47,7 +47,7 @@ class DatabaseService:
             await conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS payment_status_info (
-                user_id BIGINT PRIMARY KEY,
+                user_id BIGINT PRIMARY KEY REFERNCES payment_status_info(user_id) ON DELETE CASCADE,
                 amount NUMERIC NOT NULL,
                 currency VARCHAR(10) NULL,
                 period TEXT NULL,
@@ -63,7 +63,7 @@ class DatabaseService:
                 """
                 CREATE TABLE IF NOT EXISTS transaction_history (
                 id SERIAL PRIMARY KEY,
-                user_id BIGINT NOT NULL REFERENCES payment_status_info(user_id),
+                user_id BIGINT NOT NULL,
                 amount NUMERIC NOT NULL,
                 currency VARCHAR(10) NOT NULL,
                 payment_id TEXT NULL,
