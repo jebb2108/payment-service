@@ -32,3 +32,21 @@ async def get_user_due_to(
         database: DatabaseService = Depends(get_db)
 ):
     return await database.get_users_due_to(user_id)
+
+
+@router.post('activate')
+async def activate_subscription(
+        user_data: dict,
+        database: DatabaseService = Depends(get_db)
+):
+    user_id = user_data.get('user_id')
+    return await database.activate_subscription(user_id)
+
+
+@router.post('deactivate')
+async def deactivate_subscription(
+        user_data: dict,
+        database: DatabaseService = Depends(get_db)
+):
+    user_id = user_data.get('user_id')
+    return await database.deactivate_subscription(user_id)
