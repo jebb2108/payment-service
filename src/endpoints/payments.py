@@ -1,5 +1,3 @@
-from typing import Dict
-
 from fastapi import APIRouter
 from fastapi.params import Query, Depends
 
