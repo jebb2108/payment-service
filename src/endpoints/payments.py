@@ -33,6 +33,12 @@ async def get_user_due_to(
 ):
     return await database.get_users_due_to(user_id)
 
+@router.get('/payment_data')
+async def get_payment_data(
+        user_id: int = Query(..., description="User ID"),
+        database: DatabaseService = Depends(get_db)
+):
+    return await database.get_payment_data(user_id)
 
 @router.post('activate')
 async def activate_subscription(

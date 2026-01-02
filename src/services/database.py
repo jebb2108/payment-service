@@ -195,6 +195,21 @@ class DatabaseService:
                 } for row in rows
             ]
 
+
+    async def get_payment_data(self, user_id: int):
+        async with self.acquire_connection() as conn:
+            data = await conn.fetchrow(
+                """
+                SELECT 
+                    amount, currency, period,
+                    trial, is_active, until
+                FROM payment_status_info
+                WHERE user_id = $1
+                """, user_id
+            )
+            return dict(data) if data else None
+
+
     async def get_user_payment_method(self, user_id: int):
         async with self.acquire_connection() as conn:
             return await conn.fetchval(
